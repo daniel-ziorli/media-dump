@@ -40,38 +40,32 @@ const createPlaneMesh = () => {
             }
 
             void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-                // Normalize the fragment coordinates to the range [0, 1]
                 vec2 uv = fragCoord / iResolution.xy;
 
-                // Center the UV coordinates
-                vec2 center = vec2(0.5, 0.5);
-                vec2 offset = uv - center;
+                float aspectRatio = iResolution.x / iResolution.y;
+                vec2 center = vec2(0.5, 0.5); // Center remains at (0.5, 0.5)
 
-                // Define the size of the quad
-                vec2 quadSize = vec2(0.5, 0.49); // Width and height of the quad
+                vec2 scaledUV = vec2(uv.x * aspectRatio, uv.y);
+                vec2 scaledCenter = vec2(center.x * aspectRatio, center.y);
 
-                // Determine if the pixel is near the edge of the quad
-                vec2 edge = smoothstep(quadSize, quadSize - vec2(0.02), abs(offset));
+                vec2 offset = scaledUV - scaledCenter;
 
-                // Add time-based animated noise for a smoky effect
-                float time = iTime * 2.0; // Adjust the speed of the animation
+                vec2 quadSize = vec2(0.5 * aspectRatio, 0.5);
+                vec2 edge = smoothstep(quadSize, quadSize - vec2(0.01), abs(offset));
+
+                float time = iTime * 2.0;
                 float noiseValue = noise(offset * 10.0 + vec2(time));
 
-                // Modulate the Fresnel effect with noise to simulate smoke
                 float fresnel = pow(1.0 - dot(normalize(offset), vec2(0.0, 0.0)), 3.0);
                 float smoke = fresnel * (0.5 + 0.5 * noiseValue);
 
-                // Combine the edge detection and the smoky effect
                 float glow = (1.0 - edge.x * edge.y) * smoke;
 
-                // Set colors: purple glow for the border
                 vec3 borderColor = vec3(0.5, 0.0, 1.0); // Purple
 
-                // Mix the colors for the border, make the background fully transparent
                 vec3 finalColor = borderColor * glow;
                 float alpha = glow; // Alpha depends on the glow intensity
 
-                // Output the final color with alpha
                 fragColor = vec4(finalColor, alpha * iTransparency);
             }
 
@@ -86,17 +80,22 @@ const createPlaneMesh = () => {
 
 export const AnimatedDropzone: React.FC<{ className?: string; transparency?: number }> = ({ className, transparency = 1.0 }) => {
     const mountRef = useRef<HTMLDivElement>(null);
+    const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
 
     useEffect(() => {
         const mountElement = mountRef.current;
         if (!mountElement) return;
 
+        // Create a renderer only if there isn't one already
+        if (!rendererRef.current) {
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            mountElement.appendChild(renderer.domElement);
+            rendererRef.current = renderer;
+        }
+
         const scene = new THREE.Scene();
         const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
-        const renderer = new THREE.WebGLRenderer({ alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        mountElement.appendChild(renderer.domElement);
-
         const planeMesh = createPlaneMesh();
         scene.add(planeMesh);
         camera.position.z = 1;
@@ -104,19 +103,18 @@ export const AnimatedDropzone: React.FC<{ className?: string; transparency?: num
         const animate = (time: number) => {
             planeMesh.material.uniforms.iTime.value = time * 0.001;
             planeMesh.material.uniforms.iTransparency.value = transparency;
-            renderer.render(scene, camera);
+            rendererRef.current?.render(scene, camera);
             requestAnimationFrame(animate);
         };
         animate(0);
 
         const handleResize = () => {
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            rendererRef.current?.setSize(window.innerWidth, window.innerHeight);
             planeMesh.material.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
         };
         window.addEventListener("resize", handleResize);
 
         return () => {
-            mountElement?.removeChild(renderer.domElement);
             window.removeEventListener("resize", handleResize);
         };
     }, [transparency]);
