@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 // import localFont from "next/font/local";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
@@ -25,8 +26,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="max-w-6xl mx-auto mt-8">
-        {children}
+      <body className="w-[100vw] h-[100vh]">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

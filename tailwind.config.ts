@@ -9,14 +9,15 @@ export default {
 	],
 	theme: {
 		extend: {
-			animation: {
-				glow: "glow 1.5s infinite",
-			},
 			keyframes: {
-				glow: {
-					"0%, 100%": { boxShadow: "0 0 10px #00f, 0 0 30px #0ff" },
-					"50%": { boxShadow: "0 0 20px #0ff, 0 0 60px #00f" },
-				},
+				'border-spin': {
+					'100%': {
+						transform: 'rotate(360deg)'
+					}
+				}
+			},
+			animation: {
+				'border-spin': 'border-spin 8s ease-in-out infinite'
 			},
 			colors: {
 				primaryglow: '#800080', // Purple

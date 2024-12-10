@@ -16,25 +16,15 @@ services:
       - weaviate_data:/var/lib/weaviate
     restart: on-failure:0
     environment:
-      CLIP_INFERENCE_API: 'http://multi2vec-clip:8080'
+      OPENAI_APIKEY: $OPENAI_APIKEY
       QUERY_DEFAULTS_LIMIT: 25
       AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
       PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
-      DEFAULT_VECTORIZER_MODULE: 'multi2vec-clip'
-      ENABLE_MODULES: 'multi2vec-clip'
+      DEFAULT_VECTORIZER_MODULE: 'text2vec-openai'
+      ENABLE_MODULES: 'text2vec-openai,generative-openai'
       CLUSTER_HOSTNAME: 'node1'
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/v1/.well-known/ready" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-  multi2vec-clip:
-    image: cr.weaviate.io/semitechnologies/multi2vec-clip:sentence-transformers-clip-ViT-B-32
-    environment:
-      ENABLE_CUDA: '0'
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
       interval: 30s
       timeout: 10s
       retries: 5

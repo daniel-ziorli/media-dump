@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
 @layer base {
@@ -68,5 +68,28 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Act as a border */
+  .card-wrapper {
+    @apply relative overflow-hidden rounded-2xl bg-gradient-to-b from-slate-700 to-slate-800;
+  }
+
+  /* Gradient */
+  .card-wrapper::before {
+    background: linear-gradient(
+      0deg,
+      rgba(192, 132, 252, 0) 50%,
+      rgba(192, 132, 252, 0.4) 50%
+    );
+
+    @apply absolute left-[-100%] top-[-100%] h-[300%] w-[300%] animate-border-spin content-[''];
+  }
+
+  /* Body */
+  .card-content {
+    @apply absolute left-[1px] top-[1px] h-[calc(100%-2px)] w-[calc(100%-2px)] rounded-2xl bg-black border-0;
   }
 }
