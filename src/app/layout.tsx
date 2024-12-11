@@ -15,8 +15,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 // });
 
 export const metadata: Metadata = {
-  title: "Media Dump",
-  description: "Search and create collections from your media dumps.",
+  title: "up2speed",
+  description: "Onboard developers quickly and efficiently with the power of AI",
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ colorScheme: "dark" }}>
       <body className="w-[100vw] h-[100vh]">
         <ThemeProvider
           attribute="class"
@@ -39,3 +39,4 @@ export default function RootLayout({
     </html>
   );
 }
+

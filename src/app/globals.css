@@ -34,6 +34,7 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -66,12 +67,14 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
 
 @layer utilities {
+
   /* Act as a border */
   .card-wrapper {
     @apply relative overflow-hidden rounded-2xl bg-gradient-to-b from-slate-700 to-slate-800;
@@ -79,13 +82,30 @@ body {
 
   /* Gradient */
   .card-wrapper::before {
-    background: linear-gradient(
-      0deg,
-      rgba(192, 132, 252, 0) 50%,
-      rgba(192, 132, 252, 0.4) 50%
-    );
+    background: linear-gradient(0deg,
+        rgba(192, 132, 252, 0) 50%,
+        rgba(192, 132, 252, 0.4) 50%);
 
     @apply absolute left-[-100%] top-[-100%] h-[300%] w-[300%] animate-border-spin content-[''];
+  }
+
+  /* Modern Rounded Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 100, 100, 0.5);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(100, 100, 100, 0.7);
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
   }
 
   /* Body */
