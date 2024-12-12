@@ -6,13 +6,13 @@ import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { getFilesFromGithubRepo } from "../reader/GitReader";
-import { importFiles } from "../reader/WeaviateUtils";
+import { chunkFiles, getFilesFromGithubRepo } from "../utils/DocumentUtils";
+import { importDocuments } from "../utils/WeaviateUtils";
 
 export function OnBoardView() {
   const [url, setUrl] = useState("")
   const [urlError, setUrlError] = useState("")
-  const [isIngesting, setIsIngesting] = useState(false)
+  const [page, setPage] = useState<"onboard" | "ingest">("onboard")
   const [logs, setLogs] = useState<string[]>([])
 
 
@@ -26,22 +26,29 @@ export function OnBoardView() {
       setUrlError("Enter a valid github url")
       return;
     }
-    setIsIngesting(true);
+    setLogs([]);
+    setPage("ingest");
+
+    const logger = (message: string) => {
+      setLogs((prevLogs) => [...prevLogs, message])
+    }
 
     try {
-      const results = await getFilesFromGithubRepo(url, (log) => {
-        setLogs((prevLogs) => [...prevLogs, log])
-      });
+      const results = await getFilesFromGithubRepo(url, logger);
 
       console.log(results);
 
-      const import_result = await importFiles(results);
+      const documents = await chunkFiles(results, logger);
+
+      console.log(documents);
+
+      const import_result = await importDocuments(documents);
 
       console.log(import_result);
 
     } catch {
       setUrlError("Error fetching repository. Make sure it's public.");
-      setIsIngesting(false);
+      setPage("onboard");
     }
   }
 
@@ -56,7 +63,7 @@ export function OnBoardView() {
       >
         <Card className="rounded-3xl p-8 xl:p-16 border-2">
 
-          {!isIngesting ? (
+          {page === "onboard" ? (
             <div className="flex flex-col gap-4 justify-center mx-auto h-full w-full max-w-2xl p-8">
               <h1 className="text-6xl font-bold">up2speed</h1>
               <p className="text-2xl -mt-2">
@@ -96,7 +103,7 @@ export function OnBoardView() {
           ) : (
             <motion.div
               initial={{ opacity: 0 }}
-              animate={isIngesting ? { opacity: 1 } : { opacity: 0 }}
+              animate={page === "ingest" ? { opacity: 1 } : { opacity: 0 }}
               transition={{ delay: 0.25, duration: 0.2 }}
             >
               <div className="w-[800px] h-[60vh] flex flex-col gap-2">

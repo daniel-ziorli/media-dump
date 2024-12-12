@@ -1,5 +1,7 @@
 'use client';
 import axios from 'axios';
+import { RecursiveCharacterTextSplitter, SupportedTextSplitterLanguages } from "@langchain/textsplitters";
+
 
 interface GitHubContentItem {
   type: 'file' | 'dir';
@@ -8,6 +10,9 @@ interface GitHubContentItem {
   encoding?: string;
 }
 console.log(process.env.GITHUB_APIKEY);
+
+const IGNORED_FILE = ['package-lock.json'];
+const IGNORED_DIR = ['node_modules'];
 
 export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: string) => void): Promise<{ path: string, content: string }[]> {
   try {
@@ -34,7 +39,7 @@ export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: 
       const fileContents: { path: string, content: string }[] = [];
 
       for (const item of items) {
-        if (item.type === 'file') {
+        if (item.type === 'file' && !item.path.startsWith('.') && !IGNORED_FILE.includes(item.path.split('/').pop() || '')) {
           logger(`Downloading content from file ${item.path}`);
           console.log(`${apiUrl}/${item.path}`);
 
@@ -46,8 +51,13 @@ export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: 
           });
           console.log(fileResponse);
 
-          fileContents.push({ path: `${apiUrl}/${item.path}`, content: fileResponse.data });
-        } else if (item.type === 'dir') {
+          let content = fileResponse.data;
+          if (typeof content === 'object') {
+            content = JSON.stringify(content);
+          }
+
+          fileContents.push({ path: `${apiUrl}/${item.path}`, content });
+        } else if (item.type === 'dir' && !IGNORED_DIR.includes(item.path.split('/').pop() || '')) {
           logger(`Fetching files from ${apiUrl}/${item.path}`);
           const subContents = await fetchFiles(item.path);
           fileContents.push(...subContents);
@@ -62,3 +72,35 @@ export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: 
     throw new Error(`Failed to fetch files from GitHub repository: ${error}`);
   }
 }
+
+export type TextSplitter = "cpp" | "go" | "java" | "js" | "php" | "proto" | "python" | "rst" | "ruby" | "rust" | "scala" | "swift" | "markdown" | "latex" | "html" | "sol";
+
+export async function chunkFiles(files: { path: string, content: string }[], logger: (message: string) => void) {
+  const output: { path: string, chunks: string[] }[] = [];
+  for (const file of files) {
+    const extension = file.path.split('.').pop();
+    if (!extension) {
+      continue;
+    }
+
+    let text_splitter: RecursiveCharacterTextSplitter | null = null;
+    // im sure there is a better way but im not going to spend more time on silly types
+    SupportedTextSplitterLanguages.forEach((lang) => {
+      if (extension === lang) {
+        text_splitter = RecursiveCharacterTextSplitter.fromLanguage(lang, { chunkSize: 1000, chunkOverlap: 200 });
+      }
+    })
+
+    if (!text_splitter) {
+      text_splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000, chunkOverlap: 200 });
+    }
+
+    logger(`Chunking file ${file.path}`);
+    const chunks = await text_splitter.splitText(file.content);
+    output.push({ path: file.path, chunks });
+  }
+
+  return output;
+}
+
+
