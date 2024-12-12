@@ -8,9 +8,7 @@ import { Card } from "@/components/ui/card";
 
 
 export default function Home() {
-  const { isIngesting } = useRepoStore();
-  console.log("isIngesting", isIngesting);
-
+  const { ingestState } = useRepoStore();
 
   return (
     <div className="flex h-full w-full p-16 justify-center items-center">
@@ -22,13 +20,13 @@ export default function Home() {
         layout
       >
         <Card className="rounded-3xl p-8 xl:p-16 border-2">
-          {!isIngesting ?
+          {ingestState === "idle" ?
             (
               <OnBoardView />
             ) : (
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={isIngesting ? { opacity: 1 } : { opacity: 0 }}
+                animate={ingestState === "inprogress" ? { opacity: 1 } : { opacity: 0 }}
                 transition={{ delay: 0.25, duration: 0.2 }}
               >
                 <IngestView />

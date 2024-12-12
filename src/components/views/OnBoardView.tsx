@@ -27,23 +27,7 @@ export function OnBoardView() {
   //   setLogs((prevLogs) => [...prevLogs, message])
   // }
 
-  // try {
-  //   const results = await getFilesFromGithubRepo(url, logger);
 
-  //   console.log(results);
-
-  //   const documents = await chunkFiles(results, logger);
-
-  //   console.log(documents);
-
-  //   const import_result = await importDocuments(documents);
-
-  //   console.log(import_result);
-
-  // } catch {
-  //   setUrlError("Error fetching repository. Make sure it's public.");
-  //   setPage("onboard");
-  // }
   // }
 
   return (

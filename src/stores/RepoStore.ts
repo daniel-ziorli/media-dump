@@ -1,11 +1,13 @@
 "use client";
+import { chunkFiles, getFilesFromGithubRepo } from "@/components/utils/DocumentUtils";
+import { importDocuments } from "@/components/utils/WeaviateUtils";
 import { create } from "zustand";
 
 interface RepoStore {
   url: string;
   urlError: string;
   setUrl: (newUrl: string) => void;
-  isIngesting: boolean;
+  ingestState: "idle" | "inprogress" | "success" | "error";
   ingest: () => void;
   logs: string[];
   addLog: (message: string) => void;
@@ -20,26 +22,44 @@ const validateGitHubUrl = (url: string): boolean => {
 export const useRepoStore = create<RepoStore>((set, get) => ({
   url: "",
   urlError: "",
-  isIngesting: false,
+  ingestState: "idle",
   logs: [],
   setUrl: (newUrl: string) => {
     set({ urlError: "" });
     set({ url: newUrl });
   },
 
-  ingest: () => {
-    console.log("ingest");
-
-    set({ isIngesting: true });
+  ingest: async () => {
+    set({ ingestState: "inprogress" });
     const url = get().url;
-    console.log("ingest url", url);
 
     if (!validateGitHubUrl(url)) {
       set({ urlError: "Invalid GitHub URL" });
     }
-    console.log("valid url");
+    try {
+      const results = await getFilesFromGithubRepo(url, get().addLog);
 
-    setTimeout(() => { set({ isIngesting: false }); }, 1000);
+      console.log(results);
+
+      const documents = await chunkFiles(results, get().addLog);
+
+      console.log(documents);
+
+      get().addLog("Importing documents to Weaviate");
+      const import_result = await importDocuments(documents);
+
+
+      console.log(import_result);
+
+    } catch {
+      set({ urlError: "Error ingesting repository" });
+      set({ ingestState: "error" });
+      return;
+    }
+
+    get().addLog("Success! Repository ingested.");
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    set({ ingestState: "success" });
   },
   addLog: (message) => {
     const logs = get().logs;
