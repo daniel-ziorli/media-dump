@@ -9,7 +9,7 @@ export const IngestView = () => {
       <code
         className="bg-black rounded-sm p-2 h-full overflow-y-scroll border-2"
         ref={(ref) => {
-          if (ref) {
+          if (ref && ref.scrollTop + ref.clientHeight === ref.scrollHeight) {
             ref.scrollTop = ref.scrollHeight;
           }
         }}

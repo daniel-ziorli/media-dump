@@ -87,12 +87,12 @@ export async function chunkFiles(files: { path: string, content: string }[], log
     // im sure there is a better way but im not going to spend more time on silly types
     SupportedTextSplitterLanguages.forEach((lang) => {
       if (extension === lang) {
-        text_splitter = RecursiveCharacterTextSplitter.fromLanguage(lang, { chunkSize: 1000, chunkOverlap: 200 });
+        text_splitter = RecursiveCharacterTextSplitter.fromLanguage(lang, { chunkSize: 512, chunkOverlap: 0 });
       }
     })
 
     if (!text_splitter) {
-      text_splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000, chunkOverlap: 200 });
+      text_splitter = new RecursiveCharacterTextSplitter({ chunkSize: 512, chunkOverlap: 100 });
     }
 
     logger(`Chunking file ${file.path}`);

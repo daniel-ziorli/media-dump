@@ -5,6 +5,7 @@ import { IngestView } from "@/components/views/IngestView";
 import { motion } from "framer-motion"
 import { useRepoStore } from "@/stores/RepoStore";
 import { Card } from "@/components/ui/card";
+import { SearchView } from "@/components/views/SearchView";
 
 
 export default function Home() {
@@ -12,7 +13,8 @@ export default function Home() {
 
   return (
     <div className="flex h-full w-full p-16 justify-center items-center">
-      <motion.div
+      <SearchView />
+      {/* <motion.div
         transition={{
           duration: 0.25,
           delay: 0.1
@@ -34,6 +36,6 @@ export default function Home() {
             )
           }
         </Card>
-      </motion.div>
+      </motion.div> */}
     </div >);
 }
