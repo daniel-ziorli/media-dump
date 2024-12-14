@@ -3,10 +3,19 @@ import { chunkFiles, getFilesFromGithubRepo } from "@/components/utils/DocumentU
 import { importDocuments } from "@/components/utils/WeaviateUtils";
 import { create } from "zustand";
 
+export type RepoTree = {
+  name: string;
+  type: 'folder' | 'file';
+  content?: string;
+  children?: RepoTree[];
+}
+
 interface RepoStore {
   url: string;
   urlError: string;
   setUrl: (newUrl: string) => void;
+  repoTree?: RepoTree;
+  setRepoTree: (newTree: RepoTree) => void;
   ingestState: "idle" | "inprogress" | "success" | "error";
   ingest: () => void;
   logs: string[];
@@ -22,6 +31,7 @@ const validateGitHubUrl = (url: string): boolean => {
 export const useRepoStore = create<RepoStore>((set, get) => ({
   url: "",
   urlError: "",
+  repoTree: undefined,
   ingestState: "idle",
   logs: [],
   setUrl: (newUrl: string) => {
@@ -29,6 +39,9 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
     set({ url: newUrl });
   },
 
+  setRepoTree: (newTree: RepoTree) => {
+    set({ repoTree: newTree });
+  },
   ingest: async () => {
     set({ ingestState: "inprogress" });
     const url = get().url;
@@ -48,9 +61,7 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
       get().addLog("Importing documents to Weaviate");
       const import_result = await importDocuments(documents);
 
-
       console.log(import_result);
-
     } catch {
       set({ urlError: "Error ingesting repository" });
       set({ ingestState: "error" });
