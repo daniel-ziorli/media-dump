@@ -23,7 +23,6 @@ export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: 
     }
 
     const [, owner, repo] = match;
-
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents`;
 
     const repoTree: RepoTree = { name: '', type: 'folder', children: [] };
@@ -74,7 +73,7 @@ export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: 
 }
 
 export async function chunkFiles(repo: RepoTree, logger: (message: string) => void) {
-  const output: { path: string, chunks: string[] }[] = [];
+  const output: { file_name: string, file_path: string, chunks: string[] }[] = [];
   const files: { path: string, content: string }[] = flattenRepoTree(repo);
 
   for (const file of files) {
@@ -97,42 +96,8 @@ export async function chunkFiles(repo: RepoTree, logger: (message: string) => vo
 
     logger(`Chunking file ${file.path}`);
     const chunks = await text_splitter.splitText(file.content);
-    output.push({ path: file.path, chunks });
+    output.push({ file_name: file.path.split('/').pop() || '', file_path: file.path, chunks });
   }
 
   return output;
 }
-
-
-
-export async function chunkFilesWithTreeSitter(repo: RepoTree, logger: (message: string) => void) {
-  const output: { path: string, chunks: string[] }[] = [];
-  const files: { path: string, content: string }[] = flattenRepoTree(repo);
-
-  for (const file of files) {
-    const extension = file.path.split('.').pop();
-    if (!extension) {
-      continue;
-    }
-
-    let text_splitter: RecursiveCharacterTextSplitter | null = null;
-    // im sure there is a better way but im not going to spend more time on silly types
-    SupportedTextSplitterLanguages.forEach((lang) => {
-      if (extension === lang) {
-        text_splitter = RecursiveCharacterTextSplitter.fromLanguage(lang, { chunkSize: 512, chunkOverlap: 0 });
-      }
-    })
-
-    if (!text_splitter) {
-      text_splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000, chunkOverlap: 200 });
-    }
-
-    logger(`Chunking file ${file.path}`);
-    const chunks = await text_splitter.splitText(file.content);
-    output.push({ path: file.path, chunks });
-  }
-
-  return output;
-}
-
-

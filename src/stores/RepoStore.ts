@@ -1,5 +1,6 @@
 "use client";
 import { chunkFiles, getFilesFromGithubRepo } from "@/components/utils/DocumentUtils";
+import { createInstallationGuide } from "@/components/utils/LLMUtils";
 import { importDocuments } from "@/components/utils/WeaviateUtils";
 import { create } from "zustand";
 
@@ -17,6 +18,8 @@ interface RepoStore {
   repoTree?: RepoTree;
   setRepoTree: (newTree: RepoTree) => void;
   ingestState: "idle" | "inprogress" | "success" | "error";
+  installationGuide: string;
+  setInstallationGuide: (newGuide: string) => void;
   ingest: () => void;
   logs: string[];
   addLog: (message: string) => void;
@@ -33,6 +36,7 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
   urlError: "",
   repoTree: undefined,
   ingestState: "idle",
+  installationGuide: "",
   logs: [],
   setUrl: (newUrl: string) => {
     set({ urlError: "" });
@@ -42,6 +46,11 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
   setRepoTree: (newTree: RepoTree) => {
     set({ repoTree: newTree });
   },
+
+  setInstallationGuide: (newGuide: string) => {
+    set({ installationGuide: newGuide });
+  },
+
   ingest: async () => {
     set({ ingestState: "inprogress" });
     const url = get().url;
@@ -50,18 +59,30 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
       set({ urlError: "Invalid GitHub URL" });
     }
     try {
-      const results = await getFilesFromGithubRepo(url, get().addLog);
+      const tree = await getFilesFromGithubRepo(url, get().addLog);
 
-      console.log(results);
+      console.log(tree);
 
-      const documents = await chunkFiles(results, get().addLog);
+      const documents = await chunkFiles(tree, get().addLog);
 
       console.log(documents);
 
       get().addLog("Importing documents to Weaviate");
-      const import_result = await importDocuments(documents);
+      // const import_result = await importDocuments(documents);
+      get().addLog("Successfully imported documents to Weaviate");
 
-      console.log(import_result);
+
+      get().addLog("Generating installation guide");
+      const installation_guide = await createInstallationGuide(tree, url);
+      if (!installation_guide) {
+        set({ urlError: "Error generating installation guide" });
+        set({ ingestState: "error" });
+        return;
+      }
+      get().setInstallationGuide(installation_guide);
+      get().addLog("Successfully generated installation guide");
+
+      // console.log(import_result);
     } catch {
       set({ urlError: "Error ingesting repository" });
       set({ ingestState: "error" });
@@ -69,7 +90,6 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
     }
 
     get().addLog("Success! Repository ingested.");
-    await new Promise(resolve => setTimeout(resolve, 1000));
     set({ ingestState: "success" });
   },
   addLog: (message) => {

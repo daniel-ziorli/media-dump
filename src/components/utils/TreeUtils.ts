@@ -16,3 +16,20 @@ export function flattenRepoTree(repoTree: RepoTree): { path: string, content: st
   recursiveFlatten('', repoTree);
   return files;
 }
+
+export function getFilesByName(repoTree: RepoTree, name: string): RepoTree[] {
+  const files: RepoTree[] = [];
+
+  function recursiveSearch(currentPath: string, tree: RepoTree) {
+    for (const child of tree.children || []) {
+      if (child.type === 'file' && child.name.toLowerCase() === name.toLowerCase()) {
+        files.push(child);
+      } else if (child.type === 'folder') {
+        recursiveSearch(`${currentPath}/${child.name}`, child);
+      }
+    }
+  }
+
+  recursiveSearch('', repoTree);
+  return files;
+}

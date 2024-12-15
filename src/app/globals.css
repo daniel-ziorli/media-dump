@@ -6,6 +6,8 @@ body {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
 }
 
+
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -71,6 +73,8 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+
 }
 
 @layer utilities {
@@ -87,6 +91,90 @@ body {
         rgba(192, 132, 252, 0.4) 50%);
 
     @apply absolute left-[-100%] top-[-100%] h-[300%] w-[300%] animate-border-spin content-[''];
+  }
+
+  .markdown {
+    @apply text-neutral-200 bg-neutral-900;
+  }
+
+  .markdown h1 {
+    @apply text-3xl font-bold mb-4 text-neutral-100;
+  }
+
+  .markdown h2 {
+    @apply text-2xl font-bold my-3 text-neutral-100;
+  }
+
+  .markdown h3 {
+    @apply text-xl font-bold my-2 text-neutral-100;
+  }
+
+  .markdown h4 {
+    @apply text-lg font-bold my-1 text-neutral-100;
+  }
+
+  .markdown h5 {
+    @apply text-base font-bold my-1 text-neutral-100;
+  }
+
+  .markdown h6 {
+    @apply text-sm font-bold my-1 text-neutral-100;
+  }
+
+  .markdown p {
+    @apply my-2;
+  }
+
+  .markdown ul {
+    @apply list-disc pl-5 my-4;
+  }
+
+  .markdown ol {
+    @apply list-decimal pl-5 my-4;
+  }
+
+  .markdown li {
+    @apply my-2;
+  }
+
+  .markdown code {
+    @apply bg-neutral-700 text-neutral-200 py-1 px-2 rounded;
+  }
+
+  .markdown pre {
+    @apply bg-neutral-700 text-neutral-200 p-2 rounded overflow-x-auto;
+  }
+
+  .markdown pre code {
+    @apply bg-transparent;
+  }
+
+  .markdown table {
+    @apply w-full my-4 border-collapse;
+  }
+
+  .markdown th {
+    @apply bg-neutral-800 text-neutral-200 py-2 px-4 font-bold;
+  }
+
+  .markdown td {
+    @apply bg-neutral-700 text-neutral-200 py-2 px-4 border-b border-neutral-800;
+  }
+
+  .markdown tr:nth-child(even) {
+    @apply bg-neutral-800;
+  }
+
+  .markdown blockquote {
+    @apply bg-neutral-700 text-neutral-200 py-2 px-4 my-4 border-l-4 border-neutral-600;
+  }
+
+  .markdown hr {
+    @apply my-4 border-neutral-800;
+  }
+
+  .markdown a {
+    @apply underline text-blue-900;
   }
 
   /* Modern Rounded Scrollbar */
@@ -112,4 +200,6 @@ body {
   .card-content {
     @apply absolute left-[1px] top-[1px] h-[calc(100%-2px)] w-[calc(100%-2px)] rounded-2xl bg-black border-0;
   }
+
+
 }

@@ -1,10 +1,10 @@
 "use server";
 
-import weaviate, { dataType, GenerateOptions, vectorizer, WeaviateClient } from 'weaviate-client';
+import weaviate, { dataType, vectorizer, WeaviateClient } from 'weaviate-client';
 
 
 
-export async function importDocuments(documents: { path: string, chunks: string[] }[]) {
+export async function importDocuments(documents: { file_name: string, file_path: string, chunks: string[] }[]) {
   "use server";
   console.log('importing documents');
   const weaviateClient: WeaviateClient = await weaviate.connectToLocal({
@@ -23,6 +23,10 @@ export async function importDocuments(documents: { path: string, chunks: string[
   const returnedCollection = await weaviateClient.collections.create({
     name: 'CodeFile',
     properties: [
+      {
+        name: 'file_name',
+        dataType: dataType.TEXT,
+      },
       {
         name: 'file_path',
         dataType: dataType.TEXT,
@@ -48,7 +52,14 @@ export async function importDocuments(documents: { path: string, chunks: string[
     return false;
   }
   const collection = weaviateClient.collections.get('CodeFile');
-  const flattened = documents.flatMap((doc) => doc.chunks.map((chunk, index) => ({ file_path: doc.path, content: chunk, chunk_index: index })));
+  const flattened = documents.flatMap((doc) =>
+    doc.chunks.map((chunk, index) => ({
+      file_name: doc.file_name,
+      file_path: doc.file_path,
+      content: chunk,
+      chunk_index: index
+    }))
+  );
   const result = await collection.data.insertMany(flattened);
   console.log('Insertion response: ', result);
 
@@ -66,15 +77,7 @@ export async function hybridSearch(query: string) {
     throw new Error('Weaviate is not ready');
   }
   const collection = weaviateClient.collections.get('CodeFile');
-  const generatePrompt = `
-    You are an expert in software development.
-    Your goal is to guide the user in understanding the code.
-    You will provide relevant files, functions, classes and code snippets that help the user understand the code.
-    Do not try to solve the problem, just give the user the information they need.
-    Use markdown format.
-  `
-  const result = await collection.generate.hybrid(query,
-    { groupedTask: generatePrompt },
+  const result = await collection.query.hybrid(query,
     { limit: 10 }
   );
   return result;

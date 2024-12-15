@@ -8,6 +8,7 @@ module.exports = {
   reactStrictMode: true,
   env: {
     GITHUB_APIKEY: process.env.GITHUB_APIKEY,
+    OPENAI_APIKEY: process.env.OPENAI_APIKEY,
   }
 }
 
