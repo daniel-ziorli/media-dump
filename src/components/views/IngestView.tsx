@@ -16,7 +16,7 @@ export const IngestView = () => {
   return (
     <div className="bg-neutral-900 rounded-lg h-full overflow-y-scroll px-4 py-2 font-mono" ref={lastItem}>
       {logs.map((log, index) => (
-        <p key={index} className="text-neutral-400" ref={index === logs.length - 1 ? lastItem : null}>
+        <p key={index} className="text-neutral-400 break-all" ref={index === logs.length - 1 ? lastItem : null}>
           {log}
         </p>
       ))}

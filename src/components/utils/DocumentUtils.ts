@@ -3,6 +3,7 @@ import axios from 'axios';
 import { RecursiveCharacterTextSplitter, SupportedTextSplitterLanguages } from "@langchain/textsplitters";
 import { RepoTree } from '@/stores/RepoStore';
 import { flattenRepoTree } from './TreeUtils';
+import { generateChunkProperties } from './LLMUtils';
 
 interface GitHubContentItem {
   type: 'file' | 'dir';
@@ -13,6 +14,7 @@ interface GitHubContentItem {
 console.log(process.env.GITHUB_APIKEY);
 
 const IGNORED_FILE = ['package-lock.json'];
+const IGNORED_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'svg'];
 const IGNORED_DIR = ['node_modules'];
 
 export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: string) => void): Promise<RepoTree> {
@@ -30,7 +32,7 @@ export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: 
       logger(`Fetching files from ${apiUrl}/${path}`);
       const response = await axios.get<GitHubContentItem[]>(`${apiUrl}/${path}`, {
         headers: {
-          'Accept': 'application/vnd.github+json',
+          'Accept': 'application/vnd.github.raw+json',
           'Authorization': `Bearer ${process.env.GITHUB_APIKEY}`,
         },
       });
@@ -38,15 +40,27 @@ export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: 
       const items: GitHubContentItem[] = response.data;
 
       for (const item of items) {
-        if (item.type === 'file' && !item.path.startsWith('.') && !IGNORED_FILE.includes(item.path.split('/').pop() || '')) {
+        const extension = item.path.split('.').pop() || '';
+        const file_name = item.path.split('/').pop() || '';
+
+        if (item.type === 'file' && !file_name.startsWith('.') && !IGNORED_FILE.includes(file_name) && !IGNORED_FILE_EXTENSIONS.includes(extension)) {
           logger(`Downloading content from file ${item.path}`);
           const fileResponse = await axios.get(`${apiUrl}/${item.path}`, {
             headers: {
-              'Accept': 'application/vnd.github+json',
+              'Accept': 'application/vnd.github.raw+json',
               'Authorization': `Bearer ${process.env.GITHUB_APIKEY}`,
             },
           });
-          let content = fileResponse.data;
+
+          let content = fileResponse.data.content;
+          console.log("item: " + item);
+
+          if (fileResponse.data.encoding === 'base64') {
+            content = Buffer.from(content, 'base64').toString('utf-8');
+          }
+
+          console.log("content: " + content);
+
           if (typeof content === 'object') {
             content = JSON.stringify(content);
           }
@@ -73,7 +87,7 @@ export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: 
 }
 
 export async function chunkFiles(repo: RepoTree, logger: (message: string) => void) {
-  const output: { file_name: string, file_path: string, chunks: string[] }[] = [];
+  const output: { file_name: string, file_path: string, chunks: { content: string, tags: string[] }[] }[] = [];
   const files: { path: string, content: string }[] = flattenRepoTree(repo);
 
   for (const file of files) {
@@ -96,7 +110,14 @@ export async function chunkFiles(repo: RepoTree, logger: (message: string) => vo
 
     logger(`Chunking file ${file.path}`);
     const chunks = await text_splitter.splitText(file.content);
-    output.push({ file_name: file.path.split('/').pop() || '', file_path: file.path, chunks });
+    const generated_chunks: { content: string, tags: string[] }[] = [];
+    await chunks.forEach(async (chunk, index) => {
+      logger(`Generating properties for chunk_${index}`);
+      const generatedChunk: { content: string, tags: string[] } = await generateChunkProperties(chunk);
+      generated_chunks.push(generatedChunk);
+      logger(`Successfully generated tags: ${generatedChunk.tags}`);
+    });
+    output.push({ file_name: file.path.split('/').pop() || '', file_path: file.path, chunks: generated_chunks });
   }
 
   return output;

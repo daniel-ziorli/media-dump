@@ -59,18 +59,16 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
       set({ urlError: "Invalid GitHub URL" });
     }
     try {
+      const use_gen_ai = false;
       const tree = await getFilesFromGithubRepo(url, get().addLog);
 
-      console.log(tree);
-
-      const documents = await chunkFiles(tree, get().addLog);
-
-      console.log(documents);
-
-      get().addLog("Importing documents to Weaviate");
-      // const import_result = await importDocuments(documents);
-      get().addLog("Successfully imported documents to Weaviate");
-
+      if (use_gen_ai) {
+        const documents = await chunkFiles(tree, get().addLog);
+        get().addLog("Importing documents to Weaviate");
+        const import_result = await importDocuments(documents);
+        console.log(import_result);
+        get().addLog("Successfully imported documents to Weaviate");
+      }
 
       get().addLog("Generating installation guide");
       const installation_guide = await createInstallationGuide(tree, url);
@@ -81,8 +79,6 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
       }
       get().setInstallationGuide(installation_guide);
       get().addLog("Successfully generated installation guide");
-
-      // console.log(import_result);
     } catch {
       set({ urlError: "Error ingesting repository" });
       set({ ingestState: "error" });

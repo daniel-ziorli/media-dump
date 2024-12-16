@@ -1,11 +1,8 @@
-import { motion, steps } from "framer-motion";
-import { Card } from "../ui/card";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import { useRepoStore } from "@/stores/RepoStore";
 import { IngestView } from "./IngestView";
-import { SearchView } from "./SearchView";
 import { Button } from "../ui/button";
-import Markdown from "react-markdown";
 import { InstallationGuideView } from "./InstallationGuideView";
 
 export function OnBoardView() {
@@ -22,7 +19,7 @@ export function OnBoardView() {
 
   return (
     <div className="flex w-[80vw] h-[80vh]">
-      <div className="w-1/4 h-full rounded-l-lg border-2 p-8">
+      <div className="w-1/5 h-full rounded-l-lg border-2 p-8">
         <div className="flex flex-col gap-2">
           {steps.map((step, index) => (
             <ChecklistItem
@@ -38,7 +35,7 @@ export function OnBoardView() {
           ))}
         </div>
       </div>
-      <div className="w-3/4 h-full rounded-r-lg border-2 border-l-0 flex flex-col gap-4 p-4 overflow-hidden">
+      <div className="w-4/5 h-full rounded-r-lg border-2 border-l-0 flex flex-col gap-4 p-4 overflow-hidden">
         <motion.div
           key={step}
           initial={{ opacity: 0 }}

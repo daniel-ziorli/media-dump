@@ -1,10 +1,10 @@
 "use server";
 
-import weaviate, { dataType, vectorizer, WeaviateClient } from 'weaviate-client';
+import weaviate, { dataType, WeaviateClient } from 'weaviate-client';
 
 
 
-export async function importDocuments(documents: { file_name: string, file_path: string, chunks: string[] }[]) {
+export async function importDocuments(documents: { file_name: string, file_path: string, chunks: { content: string, tags: string[] }[] }[]) {
   "use server";
   console.log('importing documents');
   const weaviateClient: WeaviateClient = await weaviate.connectToLocal({
@@ -32,20 +32,18 @@ export async function importDocuments(documents: { file_name: string, file_path:
         dataType: dataType.TEXT,
       },
       {
-        name: 'chunk_index',
-        dataType: dataType.INT,
-        description: 'The chunk index of the chunk in the file',
-      },
-      {
         name: 'content',
         dataType: dataType.TEXT,
       },
-    ],
-    vectorizers: [
-      vectorizer.text2VecOpenAI({
-        model: 'text-embedding-3-small',
-        dimensions: 512
-      })
+
+      {
+        name: 'tags',
+        dataType: dataType.TEXT_ARRAY,
+      },
+      {
+        name: 'chunk_index',
+        dataType: dataType.INT,
+      },
     ],
   });
   if (!returnedCollection) {
@@ -56,7 +54,8 @@ export async function importDocuments(documents: { file_name: string, file_path:
     doc.chunks.map((chunk, index) => ({
       file_name: doc.file_name,
       file_path: doc.file_path,
-      content: chunk,
+      content: chunk.content,
+      tags: chunk.tags,
       chunk_index: index
     }))
   );
