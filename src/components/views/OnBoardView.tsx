@@ -4,22 +4,30 @@ import { useRepoStore } from "@/stores/RepoStore";
 import { IngestView } from "./IngestView";
 import { Button } from "../ui/button";
 import { InstallationGuideView } from "./InstallationGuideView";
+import { LocalPathView } from "./LocalPathView";
+import ProjectOverview from "./ProjectOverView";
+import { useOnBoardStore } from "@/stores/OnBoardStore";
 
 export function OnBoardView() {
 
   const { ingestState } = useRepoStore();
+  const { setOnBoardState } = useOnBoardStore();
   const [isLocallyInstalled, setIsLocallyInstalled] = useState(false);
+  const [isVSCodeIntegrated, setIsVSCodeIntegrated] = useState(false);
+
   const [step, setStep] = useState(0);
+
 
   const steps = [
     { title: "Ingest Repo", done: ingestState === "success" },
     { title: "Install Locally", done: isLocallyInstalled, nocheck: true },
-    { title: "Project Overview", done: false },
+    { title: "VSCode Integration", done: isVSCodeIntegrated, nocheck: true },
+    { title: "Project Overview", done: false, nocheck: true },
   ];
 
   return (
     <div className="flex w-[80vw] h-[80vh]">
-      <div className="w-1/5 h-full rounded-l-lg border-2 p-8">
+      <div className="w-1/4 h-full rounded-l-lg border-2 p-8">
         <div className="flex flex-col gap-2">
           {steps.map((step, index) => (
             <ChecklistItem
@@ -35,7 +43,7 @@ export function OnBoardView() {
           ))}
         </div>
       </div>
-      <div className="w-4/5 h-full rounded-r-lg border-2 border-l-0 flex flex-col gap-4 p-4 overflow-hidden">
+      <div className="w-3/4 h-full rounded-r-lg border-2 border-l-0 flex flex-col gap-4 p-4 overflow-hidden">
         <motion.div
           key={step}
           initial={{ opacity: 0 }}
@@ -46,6 +54,8 @@ export function OnBoardView() {
         >
           {step === 0 && <IngestView />}
           {step === 1 && <InstallationGuideView />}
+          {step === 2 && <LocalPathView />}
+          {step === 3 && <ProjectOverview />}
         </motion.div>
         <div className="flex gap-4">
           <Button
@@ -62,9 +72,13 @@ export function OnBoardView() {
             onClick={() => {
               setStep((step) => step + 1)
               if (step >= 1) setIsLocallyInstalled(true)
+              if (step >= 2) setIsVSCodeIntegrated(true)
+              if (step === steps.length - 1) {
+                setOnBoardState("complete");
+              }
             }}
           >
-            Next
+            {step === steps.length - 1 ? "Done" : "Next"}
           </Button>
         </div>
       </div>
@@ -74,7 +88,7 @@ export function OnBoardView() {
 
 function ChecklistItem({ title, done, onClick }: { title: string, done: boolean, onClick?: () => void }) {
   return (
-    <div className={"flex items-center gap-2 font-mono " + (done ? "cursor-pointer" : "cursor-default")} onClick={onClick}>
+    <div className={"flex items-center gap-2 font-mono bg-neutral-900 p-2 rounded-lg " + (done ? "cursor-pointer hover:bg-neutral-800" : "cursor-default")} onClick={onClick}>
       <motion.div
         className="relative flex items-center justify-center w-6 h-6 border-2 border-neutral-500 rounded-full"
         animate={{
@@ -106,7 +120,7 @@ function ChecklistItem({ title, done, onClick }: { title: string, done: boolean,
         animate={done ? "done" : "initial"}
       >
         <motion.p
-          className={`text-lg ${done ? "text-neutral-500" : "text-white"}`}
+          className={`text-md ${done ? "text-neutral-500" : "text-white"}`}
           initial={{ color: "#ffffff" }}
           animate={{ color: done ? "#737373" : "#ffffff" }}
           transition={{ duration: 0.3 }}

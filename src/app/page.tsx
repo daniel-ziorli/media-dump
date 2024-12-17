@@ -1,28 +1,16 @@
 "use client";
 
 import { HomeView } from "@/components/views/HomeView";
-import { IngestView } from "@/components/views/IngestView";
 import { motion } from "framer-motion"
 import { useRepoStore } from "@/stores/RepoStore";
 import { Card } from "@/components/ui/card";
-import { SearchView } from "@/components/views/SearchView";
 import { OnBoardView } from "@/components/views/OnBoardView";
-import { hybridSearch } from "@/components/utils/WeaviateUtils";
+import { useOnBoardStore } from "@/stores/OnBoardStore";
+import { SearchView } from "@/components/views/SearchView";
 
 
 export default function Home() {
-  const { ingestState } = useRepoStore();
-
-  const test = () => {
-    const result = hybridSearch("important");
-    console.log(result);
-    const result2 = hybridSearch("backend");
-    console.log(result2);
-
-    const result3 = hybridSearch("installation");
-    console.log(result3);
-  }
-
+  const { onBoardState } = useOnBoardStore();
 
   return (
     <div className="flex h-full w-full p-8 justify-center items-center">
@@ -33,19 +21,38 @@ export default function Home() {
         }}
         layout
       >
-        <Card className="rounded-3xl p-8 border-2">
-          {ingestState === "idle" ?
-            <HomeView /> :
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.25, duration: 0.2 }}
-            >
-              <OnBoardView />
-            </motion.div>
-          }
-        </Card>
-        <button onClick={test}>test</button>
+
+        {onBoardState === "complete" ?
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.25, duration: 0.2 }}
+            className="w-full h-full"
+          >
+            <div className="p-4 h-[100vh] w-[100vw] grid grid-cols-2 gap-4">
+              <Card className="">
+              </Card>
+              <Card className="">
+              </Card>
+            </div>
+          </motion.div>
+          :
+          <Card className="rounded-3xl p-8 border-2">
+            {(onBoardState === "idle" || onBoardState === "error") &&
+              <HomeView />
+            }
+
+            {onBoardState === "inprogress" &&
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.25, duration: 0.2 }}
+              >
+                <OnBoardView />
+              </motion.div>
+            }
+          </Card>
+        }
       </motion.div>
     </div >);
 }

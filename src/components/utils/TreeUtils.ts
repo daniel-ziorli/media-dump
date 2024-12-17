@@ -33,3 +33,20 @@ export function getFilesByName(repoTree: RepoTree, name: string): RepoTree[] {
   recursiveSearch('', repoTree);
   return files;
 }
+
+export function removeContentFieldsFromTree(repoTree: RepoTree): RepoTree {
+  const cleanTree = JSON.parse(JSON.stringify(repoTree));
+
+  function recursiveRemoveContent(currentTree: RepoTree) {
+    for (const child of currentTree.children || []) {
+      if (child.type === 'file') {
+        delete child.content;
+      } else {
+        recursiveRemoveContent(child);
+      }
+    }
+  }
+
+  recursiveRemoveContent(cleanTree);
+  return cleanTree;
+}

@@ -4,10 +4,12 @@ import { FaArrowRight } from "react-icons/fa";
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useRepoStore } from "@/stores/RepoStore";
+import { useOnBoardStore } from "@/stores/OnBoardStore";
 
 
 export function HomeView() {
-  const { url, urlError, setUrl, ingest } = useRepoStore();
+  const { url, setUrl, ingest } = useRepoStore();
+  const { setOnBoardState, onBoardError } = useOnBoardStore();
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUrl(e.target.value)
@@ -30,6 +32,7 @@ export function HomeView() {
               onChange={handleUrlChange}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
+                  setOnBoardState("inprogress");
                   ingest();
                 }
               }}
@@ -41,12 +44,15 @@ export function HomeView() {
 
           <Button
             className="bg-gradient-to-br from-pink-600 to-purple-600"
-            onClick={ingest}
+            onClick={() => {
+              setOnBoardState("inprogress");
+              ingest();
+            }}
           >
             <FaArrowRight className="text-slate-100" />
           </Button>
         </div>
-        <p className={"text-red-500 text-destructive text-sm h-[0px] ml-4 overflow-visible" + (urlError ? "visible" : "invisible")} >{urlError}</p>
+        <p className={"text-red-500 text-destructive text-sm h-[0px] ml-4 overflow-visible" + (onBoardError ? "visible" : "invisible")} >{onBoardError}</p>
       </div>
     </div>
   )
