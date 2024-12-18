@@ -201,3 +201,15 @@ export async function generateChunkProperties(chunk: string): Promise<{ content:
     return { content: chunk, tags: [] };
   }
 }
+
+export async function generateChatStream(messages: { role: "user" | "assistant" | "system", content: string }[]) {
+  const stream = await llmClient.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages,
+    temperature: 0.1,
+    max_tokens: 1000,
+    stream: true
+  });
+
+  return stream;
+}

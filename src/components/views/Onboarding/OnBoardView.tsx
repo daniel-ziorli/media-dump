@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useRepoStore } from "@/stores/RepoStore";
 import { IngestView } from "./IngestView";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { InstallationGuideView } from "./InstallationGuideView";
 import { LocalPathView } from "./LocalPathView";
 import ProjectOverview from "./ProjectOverView";

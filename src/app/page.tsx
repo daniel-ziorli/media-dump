@@ -4,9 +4,10 @@ import { HomeView } from "@/components/views/HomeView";
 import { motion } from "framer-motion"
 import { useRepoStore } from "@/stores/RepoStore";
 import { Card } from "@/components/ui/card";
-import { OnBoardView } from "@/components/views/OnBoardView";
+import { OnBoardView } from "@/components/views/Onboarding/OnBoardView";
 import { useOnBoardStore } from "@/stores/OnBoardStore";
 import { SearchView } from "@/components/views/SearchView";
+import { AppView } from "@/components/views/App/AppView";
 
 
 export default function Home() {
@@ -29,12 +30,7 @@ export default function Home() {
             transition={{ delay: 0.25, duration: 0.2 }}
             className="w-full h-full"
           >
-            <div className="p-4 h-[100vh] w-[100vw] grid grid-cols-2 gap-4">
-              <Card className="">
-              </Card>
-              <Card className="">
-              </Card>
-            </div>
+            <AppView />
           </motion.div>
           :
           <Card className="rounded-3xl p-8 border-2">

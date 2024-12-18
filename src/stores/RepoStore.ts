@@ -56,7 +56,7 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
       // please don't judge this is temporary cant be running up those openai bills
       const generate_embeddings = false;
       const generate_installation_guide = false;
-      const generate_project_overview = true;
+      const generate_project_overview = false;
 
       let tree: RepoTree | undefined = undefined;
       if (generate_embeddings || generate_installation_guide || generate_project_overview) {
