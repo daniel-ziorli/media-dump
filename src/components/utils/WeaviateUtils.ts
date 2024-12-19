@@ -1,10 +1,11 @@
 "use server";
 
+import { IChunk } from '@/stores/RepoStore';
 import weaviate, { dataType, WeaviateClient } from 'weaviate-client';
 
 
 
-export async function importDocuments(documents: { file_name: string, file_path: string, chunks: { content: string, tags: string[] }[] }[]) {
+export async function importDocuments(documents: { file_name: string, file_path: string, chunks: IChunk[] }[]) {
   "use server";
   console.log('importing documents');
   const weaviateClient: WeaviateClient = await weaviate.connectToLocal({
@@ -41,9 +42,13 @@ export async function importDocuments(documents: { file_name: string, file_path:
         dataType: dataType.TEXT_ARRAY,
       },
       {
-        name: 'chunk_index',
+        name: "start_line",
         dataType: dataType.INT,
       },
+      {
+        name: "end_line",
+        dataType: dataType.INT,
+      }
     ],
   });
   if (!returnedCollection) {
@@ -56,7 +61,8 @@ export async function importDocuments(documents: { file_name: string, file_path:
       file_path: doc.file_path,
       content: chunk.content,
       tags: chunk.tags,
-      chunk_index: index
+      start_line: chunk.start_line,
+      end_line: chunk.end_line
     }))
   );
   const result = await collection.data.insertMany(flattened);

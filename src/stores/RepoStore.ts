@@ -7,9 +7,19 @@ import { useOnBoardStore } from "./OnBoardStore";
 
 export type RepoTree = {
   name: string;
+  path: string;
   type: 'folder' | 'file';
   content?: string;
   children?: RepoTree[];
+}
+
+export interface IChunk {
+  file_name: string;
+  file_path: string;
+  content: string;
+  tags: string[];
+  start_line: number;
+  end_line: number;
 }
 
 interface RepoStore {
@@ -54,13 +64,15 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
     }
     try {
       // please don't judge this is temporary cant be running up those openai bills
+      const download_files = true;
       const generate_embeddings = false;
       const generate_installation_guide = false;
       const generate_project_overview = false;
 
       let tree: RepoTree | undefined = undefined;
-      if (generate_embeddings || generate_installation_guide || generate_project_overview) {
+      if (generate_embeddings || generate_installation_guide || generate_project_overview || download_files) {
         tree = await getFilesFromGithubRepo(url, get().addLog);
+        console.log(await chunkFiles(tree, get().addLog));
       }
 
       if (generate_embeddings && tree) {

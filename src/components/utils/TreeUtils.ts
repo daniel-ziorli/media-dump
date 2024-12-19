@@ -34,6 +34,30 @@ export function getFilesByName(repoTree: RepoTree, name: string): RepoTree[] {
   return files;
 }
 
+export function getFilesByPath(repoTree: RepoTree | undefined, path: string): RepoTree[] {
+  if (!repoTree) {
+    return [];
+  }
+  const files: RepoTree[] = [];
+  console.log('find path: ' + path);
+
+  function recursiveSearch(currentPath: string, tree: RepoTree) {
+    for (const child of tree.children || []) {
+
+      console.log(`${currentPath.slice(1)}/${child.name}`);
+
+      if (child.type === 'file' && `${currentPath.slice(1)}/${child.name}` === path) {
+        files.push(child);
+      } else if (child.type === 'folder') {
+        recursiveSearch(`${currentPath}/${child.name}`, child);
+      }
+    }
+  }
+
+  recursiveSearch('', repoTree);
+  return files;
+}
+
 export function removeContentFieldsFromTree(repoTree: RepoTree): RepoTree {
   const cleanTree = JSON.parse(JSON.stringify(repoTree));
 

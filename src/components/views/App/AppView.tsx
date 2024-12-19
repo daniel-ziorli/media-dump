@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import React from 'react';
 import { ChatView } from './ChatView';
+import { ContextView } from './ContextView';
 
 export function AppView() {
   return (
@@ -9,7 +10,7 @@ export function AppView() {
         <ChatView />
       </Card>
       <Card className="col-span-1 row-span-1">
-        context window eventually here
+        <ContextView />
       </Card>
     </div>
   );

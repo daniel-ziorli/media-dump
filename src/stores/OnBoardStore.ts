@@ -17,7 +17,7 @@ export const useOnBoardStore = create<OnBoardStore>((set) => ({
   installationGuide: "",
   projectOverview: "",
   localPath: "",
-  onBoardState: "complete",
+  onBoardState: "idle",
   onBoardError: "",
   setInstallationGuide: (guide: string) => set({ installationGuide: guide }),
   setProjectOverview: (overview: string) => set({ projectOverview: overview }),

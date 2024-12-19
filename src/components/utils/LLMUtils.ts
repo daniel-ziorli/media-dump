@@ -3,7 +3,6 @@
 import { OpenAI } from "openai";
 import { RepoTree } from "@/stores/RepoStore";
 import { getFilesByName, removeContentFieldsFromTree } from "./TreeUtils";
-import { hybridSearch } from "./WeaviateUtils";
 
 const llmClient = new OpenAI({
   apiKey: process.env['OPENAI_APIKEY'],
@@ -144,7 +143,7 @@ export async function createOverview(tree: RepoTree) {
   return response.choices[0].message.content;
 }
 
-export async function generateChunkProperties(chunk: string): Promise<{ content: string, tags: string[] }> {
+export async function generateChunkTags(chunk: string): Promise<string[]> {
   const response = await llmClient.beta.chat.completions.parse({
     model: "gpt-4o-mini",
     messages: [
@@ -191,14 +190,14 @@ export async function generateChunkProperties(chunk: string): Promise<{ content:
     const content = response.choices[0].message.content;
     if (content === null) {
       console.error("Content is null in generateChunkProperties: " + response);
-      return { content: chunk, tags: [] };
+      return [];
     }
     const parsedResponse = JSON.parse(content);
     const { chunk_tags } = parsedResponse;
-    return { content: chunk, tags: chunk_tags };
+    return chunk_tags;
   } catch (error) {
     console.error(error);
-    return { content: chunk, tags: [] };
+    return [];
   }
 }
 

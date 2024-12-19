@@ -1,7 +1,6 @@
 import { generateChatStream } from "@/components/utils/LLMUtils";
-import { hybridSearch } from "@/components/utils/WeaviateUtils";
-import OpenAI from "openai";
 import { create } from "zustand";
+import { useContextStore } from "./ContextStore";
 
 export interface IMessage {
   role: "user" | "assistant" | "system";
@@ -19,9 +18,7 @@ export const useChatStore = create<ChatStore>((set) => ({
   addMessage: async (message: string) => {
     set((state) => ({ messages: [...state.messages, { role: "user", content: message }] }))
 
-    const context = await hybridSearch(message);
-    console.log(context);
-
+    const context = await useContextStore.getState().getContext(message);
 
     const messages: IMessage[] = [
       {
@@ -44,6 +41,7 @@ export const useChatStore = create<ChatStore>((set) => ({
         example 3:
         The [App.jsx](/src/components/App.jsx) file is a React component that represents the main application interface.
         Inside the App component, there is a [Home.jsx](/src/components/Home.jsx) component and an [About.jsx](/src/components/About.jsx) component.
+        These components can be found in the [components](/src/components) directory.
         `
       },
       ...useChatStore.getState().messages
@@ -51,7 +49,7 @@ export const useChatStore = create<ChatStore>((set) => ({
     messages[messages.length - 1] = {
       role: "user" as "user" | "assistant" | "system",
       content: `<context>
-      ${context.objects.map((object) => JSON.stringify(object.properties)).join('\n')}
+      ${context.map((object) => JSON.stringify(object.properties)).join('\n')}
       </context>
       
       ${messages[messages.length - 1].content}`

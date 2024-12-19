@@ -1,9 +1,9 @@
 'use client';
 import axios from 'axios';
 import { RecursiveCharacterTextSplitter, SupportedTextSplitterLanguages } from "@langchain/textsplitters";
-import { RepoTree } from '@/stores/RepoStore';
+import { IChunk, RepoTree } from '@/stores/RepoStore';
 import { flattenRepoTree } from './TreeUtils';
-import { generateChunkProperties } from './LLMUtils';
+import { generateChunkTags } from './LLMUtils';
 
 interface GitHubContentItem {
   type: 'file' | 'dir';
@@ -27,7 +27,7 @@ export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: 
     const [, owner, repo] = match;
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents`;
 
-    const repoTree: RepoTree = { name: '', type: 'folder', children: [] };
+    const repoTree: RepoTree = { name: '', path: '', type: 'folder', children: [] };
     const fetchFiles = async (path: string = '', repoTree: RepoTree): Promise<RepoTree> => {
       logger(`Fetching files from ${apiUrl}/${path}`);
       const response = await axios.get<GitHubContentItem[]>(`${apiUrl}/${path}`, {
@@ -66,13 +66,13 @@ export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: 
           }
 
           const fileName = item.path.split('/').pop() || '';
-          repoTree.children?.push({ name: fileName, type: 'file', content });
+          repoTree.children?.push({ name: fileName, path: item.path, type: 'file', content });
         } else if (item.type === 'dir' && !IGNORED_DIR.includes(item.path.split('/').pop() || '')) {
           logger(`Fetching files from ${apiUrl}/${item.path}`);
           if (!repoTree.children) {
             throw new Error('Failed to fetch files from GitHub repository.');
           }
-          repoTree.children.push({ name: item.path.split('/').pop() || '', type: 'folder', children: [] });
+          repoTree.children.push({ name: item.path.split('/').pop() || '', path: item.path, type: 'folder', children: [] });
           await fetchFiles(item.path, repoTree.children[repoTree.children.length - 1] as RepoTree);
         }
       }
@@ -87,7 +87,7 @@ export async function getFilesFromGithubRepo(repoUrl: string, logger: (message: 
 }
 
 export async function chunkFiles(repo: RepoTree, logger: (message: string) => void) {
-  const output: { file_name: string, file_path: string, chunks: { content: string, tags: string[] }[] }[] = [];
+  const output: { file_name: string, file_path: string, chunks: IChunk[] }[] = [];
   const files: { path: string, content: string }[] = flattenRepoTree(repo);
 
   for (const file of files) {
@@ -100,7 +100,7 @@ export async function chunkFiles(repo: RepoTree, logger: (message: string) => vo
     // im sure there is a better way but im not going to spend more time on silly types
     SupportedTextSplitterLanguages.forEach((lang) => {
       if (extension === lang) {
-        text_splitter = RecursiveCharacterTextSplitter.fromLanguage(lang, { chunkSize: 1000, chunkOverlap: 200 });
+        text_splitter = RecursiveCharacterTextSplitter.fromLanguage(lang, { chunkSize: 1000, chunkOverlap: 0 });
       }
     })
 
@@ -110,13 +110,30 @@ export async function chunkFiles(repo: RepoTree, logger: (message: string) => vo
 
     logger(`Chunking file ${file.path}`);
     const chunks = await text_splitter.splitText(file.content);
-    const generated_chunks: { content: string, tags: string[] }[] = [];
-    await chunks.forEach(async (chunk, index) => {
-      logger(`Generating properties for chunk_${index}`);
-      const generatedChunk: { content: string, tags: string[] } = await generateChunkProperties(chunk);
-      generated_chunks.push(generatedChunk);
-      logger(`Successfully generated tags: ${generatedChunk.tags}`);
-    });
+    const file_lines = file.content.split('\n').map((line) => line.trim());
+
+    const generated_chunks: IChunk[] = [];
+
+    let start_line = 0;
+    for (const chunk of chunks) {
+      const chunk_lines = chunk.split('\n');
+
+      start_line = file_lines.indexOf(chunk_lines[0].trim(), start_line);
+      let end_line = start_line + chunk_lines.length - 1;
+
+      const tags = await generateChunkTags(chunk);
+
+      generated_chunks.push({
+        file_name: file.path.split('/').pop() || '',
+        file_path: file.path,
+        content: chunk,
+        tags,
+        start_line: start_line + 1,
+        end_line: end_line + 1,
+      });
+
+    }
+
     output.push({ file_name: file.path.split('/').pop() || '', file_path: file.path, chunks: generated_chunks });
   }
 
