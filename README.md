@@ -1,6 +1,6 @@
 # Up2Speed  
 
-Up2Speed is a developer-focused onboarding tool designed to simplify the process of starting with new projects. It streamlines workflows by providing clear installation steps, real-time feedback, and intuitive navigation for exploring codebases.  
+Up2Speed is a developer-focused onboarding tool designed to simplify the process of starting with new projects. It streamlines workflows by providing clear installation steps, semantic search, and intuitive navigation for exploring codebases.  
 
 ## Features  
 
