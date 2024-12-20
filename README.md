@@ -8,7 +8,6 @@ Up2Speed is a developer-focused onboarding tool designed to simplify the process
 - **Real-Time Log View**: Provides transparent backend operations during the onboarding process.  
 - **Interactive Workflow**: Step-by-step guidance with dynamic visual feedback to track progress.  
 - **Context Pills**: Colored tags differentiate folders, files, and code snippets for quick identification and seamless navigation.  
-- **Responsive Design**: Fully optimized for use across various devices and screen sizes.  
 - **Dark Theme**: Developer-friendly design for better usability and reduced eye strain.  
 
 ## Installation  
