@@ -177,6 +177,11 @@ body {
     @apply underline text-blue-900;
   }
 
+  .highlight-line {
+    background-color: rgba(255, 255, 0, 0.2);
+    /* Light yellow with transparency */
+  }
+
   /* Modern Rounded Scrollbar */
   ::-webkit-scrollbar {
     width: 8px;

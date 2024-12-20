@@ -56,7 +56,7 @@ export async function importDocuments(documents: { file_name: string, file_path:
   }
   const collection = weaviateClient.collections.get('CodeFile');
   const flattened = documents.flatMap((doc) =>
-    doc.chunks.map((chunk, index) => ({
+    doc.chunks.map((chunk) => ({
       file_name: doc.file_name,
       file_path: doc.file_path,
       content: chunk.content,

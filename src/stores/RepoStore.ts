@@ -9,6 +9,7 @@ export type RepoTree = {
   name: string;
   path: string;
   type: 'folder' | 'file';
+  line?: number;
   content?: string;
   children?: RepoTree[];
 }
@@ -66,13 +67,13 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
       // please don't judge this is temporary cant be running up those openai bills
       const download_files = true;
       const generate_embeddings = false;
-      const generate_installation_guide = false;
-      const generate_project_overview = false;
+      const generate_installation_guide = true;
+      const generate_project_overview = true;
 
       let tree: RepoTree | undefined = undefined;
       if (generate_embeddings || generate_installation_guide || generate_project_overview || download_files) {
         tree = await getFilesFromGithubRepo(url, get().addLog);
-        console.log(await chunkFiles(tree, get().addLog));
+        set({ repoTree: tree });
       }
 
       if (generate_embeddings && tree) {
@@ -93,7 +94,6 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
         useOnBoardStore.getState().installationGuide = installation_guide;
         get().addLog("Successfully generated installation guide");
 
-
       } else {
         useOnBoardStore.getState().setInstallationGuide("This is a test installation guide.");
       }
@@ -107,7 +107,7 @@ export const useRepoStore = create<RepoStore>((set, get) => ({
         useOnBoardStore.getState().setProjectOverview(project_overview);
         get().addLog("Successfully generated project overview");
       } else {
-        useOnBoardStore.getState().setProjectOverview("This is a test project overview [readme.md](readme.md). ");
+        useOnBoardStore.getState().setProjectOverview("This is a test project overview [readme.md/3](readme.md/3) `[readme.md:3] Readme line 3` `[readme.md] Readme` `[src/components]src/components`. ");
       }
     } catch {
       return;

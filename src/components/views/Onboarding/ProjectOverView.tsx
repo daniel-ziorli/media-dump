@@ -1,19 +1,12 @@
 import { useOnBoardStore } from "@/stores/OnBoardStore";
-import { FileRef } from "../../ui/fileref";
-import Markdown from "react-markdown";
+import { CustomMarkdown } from "@/components/ui/custommarkdown";
 
 export default function ProjectOverview() {
   const { projectOverview } = useOnBoardStore();
   return (
-    <Markdown
+    <CustomMarkdown
       className="h-full overflow-y-scroll p-4 markdown rounded-md"
-      components={{
-        a: ({ href }) => (
-          <FileRef filepath={href} />
-        ),
-      }}
-    >
-      {projectOverview}
-    </Markdown>
+      content={projectOverview}
+    />
   );
 }

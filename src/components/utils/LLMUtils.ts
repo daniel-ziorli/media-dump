@@ -86,7 +86,8 @@ export async function createOverview(tree: RepoTree) {
 
           output format:
           respond in mark down format
-          when talking about a file within the repository you must always link the to files path.
+          when referencing a file or folder within your response you must always include a code block markdown link to the full path with a title.
+          for example, \`[src/main.py](src/main.py)\` is a link to the file src/main.py with a title of src/main.py.
 
           <example>
           # Project Title
@@ -95,19 +96,20 @@ export async function createOverview(tree: RepoTree) {
           ## Repository Structure
 
           The project contains several key folders
-          1. [src/](src/) The source code for the application.
-          2. [api/](api/) The API endpoints for the application.
-          3. [tests/](tests/) The unit and integration tests for the application.
-          4. [docs/](docs/) The documentation for the application.
+          1. \`[src/](src)\` The source code for the application.
+          2. \`[api/](api)\` The API endpoints for the application.
+          3. \`[tests/](tests)\` The unit and integration tests for the application.
+          4. \`[docs/](docs)\` The documentation for the application.
 
-          Additionally, there are configuration files like [requirements.txt](requirements.txt), [README.md](README.md), and [.gitignore](.gitignore).
+          Additionally, there are configuration files like \`[requirements.txt]\`,
+            \`[README.md](readme.md)\`, and \`[.gitignore](.gitignore)\`.
 
           ## Entry Points
           1. **Main Application**
-            - [src/main.py](src/main.py) The primary entry point for running the application.
+            - \`[src/main.py](src/main.py)\` The primary entry point for running the application.
 
           2. **API Endpoints** 
-            - [api/endpoints.py](api/endpoints.py) Core endpoints that handle HTTP requests and responses.
+            - \`[api/endpoints.py](api/endpoints.py)\` Core endpoints that handle HTTP requests and responses.
           </example>
 
           <example>
@@ -118,18 +120,18 @@ export async function createOverview(tree: RepoTree) {
           ## Repository Structure
 
           The project contains several key folders:
-          - [src/](src/) for the source code, which is further divided into the backend and frontend code.  
-          - [backend/](src/backend/) for the backend logic, including API routes and services.  
-          - [frontend/](src/frontend/) for the frontend application, typically React or another framework.  
-          Additionally, there are configuration files like [package.json](package.json), [README.md](README.md), and [.gitignore](.gitignore).
+          - \`[src/](src)\` for the source code, which is further divided into the backend and frontend code.  
+          - \`[backend/](backend)\` for the backend logic, including API routes and services.  
+          - \`[frontend/](frontend)\` for the frontend application, typically React or another framework.  
+          Additionally, there are configuration files like \`[package.json](package.json)\`, \`[README.md](readme.md)\`, and \`[.gitignore](.gitignore)\`.
 
           ## Entry Points
           1. **Backend**  
-            - [src/backend/server.js](src/backend/server.js) The main backend entry point, where the server is initialized and API routes are defined.
-            - [src/backend/routes.js](src/backend/routes.js) Defines API routes for handling requests and responses.
+            - \`[src/backend/server.js](src/backend/server.js)\` The main backend entry point, where the server is initialized and API routes are defined.
+            - \`[src/backend/routes.js](src/backend/routes.js)\` Defines API routes for handling requests and responses.
 
           2. **Frontend**  
-            - [src/frontend/index.js](src/frontend/index.js) The main entry point for the frontend application, typically where the React app or other framework is bootstrapped.
+            - \`[src/frontend/index.js](src/frontend/index.js)\` The main entry point for the frontend application, typically where the React app or other framework is bootstrapped.
           </example>
 
           note: focus on readability, not completeness. developers should be able to quickly scan through the overview and get a good idea of the structure and where to start.

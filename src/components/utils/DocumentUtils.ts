@@ -119,7 +119,7 @@ export async function chunkFiles(repo: RepoTree, logger: (message: string) => vo
       const chunk_lines = chunk.split('\n');
 
       start_line = file_lines.indexOf(chunk_lines[0].trim(), start_line);
-      let end_line = start_line + chunk_lines.length - 1;
+      const end_line = start_line + chunk_lines.length - 1;
 
       const tags = await generateChunkTags(chunk);
 

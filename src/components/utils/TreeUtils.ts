@@ -46,7 +46,7 @@ export function getFilesByPath(repoTree: RepoTree | undefined, path: string): Re
 
       console.log(`${currentPath.slice(1)}/${child.name}`);
 
-      if (child.type === 'file' && `${currentPath.slice(1)}/${child.name}` === path) {
+      if (child.type === 'file' && (`${currentPath}/${child.name}` === path || `${currentPath.slice(1)}/${child.name}` === path)) {
         files.push(child);
       } else if (child.type === 'folder') {
         recursiveSearch(`${currentPath}/${child.name}`, child);
